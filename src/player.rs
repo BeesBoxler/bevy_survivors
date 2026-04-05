@@ -1,4 +1,4 @@
-use crate::common_components::*;
+use crate::{common_components::*, game::MainCamera};
 use bevy::prelude::*;
 use bevy_enhanced_input::prelude::*;
 
@@ -47,8 +47,10 @@ fn spawn_player(
 fn player_movement(
     movement: On<Fire<PlayerMove>>,
     player: Single<(&mut Transform, &Speed), With<Player>>,
+    mut camera: Single<&mut Transform, (With<MainCamera>, Without<Player>)>,
 ) {
     let (mut transform, speed) = player.into_inner();
 
     transform.translation += movement.value.extend(0.) * speed.0;
+    camera.translation += movement.value.extend(0.) * speed.0;
 }
