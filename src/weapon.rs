@@ -1,5 +1,8 @@
 use crate::{common_components::Speed, player::Player};
 use bevy::{color::palettes::css::RED, prelude::*};
+use bevy_rapier2d::prelude::{
+    ActiveEvents, Collider, CollidingEntities, GravityScale, RigidBody, Sensor, Velocity,
+};
 use rand::{RngExt, rng};
 use std::{ops::Range, time::Duration};
 
@@ -16,7 +19,7 @@ pub fn weapon_plugin(app: &mut App) {
 }
 
 #[derive(Component)]
-struct Bullet {
+pub struct Bullet {
     pub damage: f32,
     pub direction: Vec2,
 }
@@ -53,7 +56,7 @@ impl Weapon {
             ),
             3.,
             self.damage,
-            2.,
+            100.,
             meshes,
             materials,
             origin,
@@ -103,7 +106,7 @@ fn update_bullets(
             commands.entity(entity).despawn();
         }
 
-        transform.translation += bullet.direction.extend(0.) * speed.0;
+        // transform.translation += bullet.direction.extend(0.) * speed.0;
     }
 }
 
@@ -117,9 +120,19 @@ fn bullet(
     origin: Vec3,
 ) -> impl Bundle {
     (
+        RigidBody::Dynamic,
+        GravityScale(0.),
+        Velocity {
+            linvel: direction.normalize() * speed,
+            angvel: 0.,
+        },
+        Sensor,
         Bullet { direction, damage },
+        CollidingEntities::default(),
+        ActiveEvents::COLLISION_EVENTS,
         Speed(speed),
         WithDuration::new(range),
+        Collider::ball(2.),
         Mesh2d(meshes.add(Circle::new(2.))),
         MeshMaterial2d(materials.add(ColorMaterial::from_color(RED))),
         Transform {

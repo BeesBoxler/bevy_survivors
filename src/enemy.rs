@@ -1,11 +1,12 @@
-use crate::{common_components::*, game::MainCamera};
+use crate::{common_components::*, game::MainCamera, weapon::Bullet};
 use bevy::{camera::Viewport, prelude::*};
+use bevy_rapier2d::prelude::{ActiveEvents, Collider, CollidingEntities, RigidBody, Sensor};
 use rand::{RngExt, rng};
 use std::time::Duration;
 
 pub fn enemy_plugin(app: &mut App) {
     app.add_systems(Startup, create_enemy_spawner);
-    app.add_systems(Update, tick);
+    app.add_systems(Update, (tick, bullet_hit, despawn_dead));
 }
 
 #[derive(Component)]
@@ -20,9 +21,14 @@ fn enemy_bundle(
 ) -> impl Bundle {
     (
         Enemy,
+        RigidBody::KinematicVelocityBased,
+        Sensor,
         Health(5.),
         Speed::default(),
         Strength::default(),
+        Collider::ball(15.),
+        CollidingEntities::default(),
+        ActiveEvents::COLLISION_EVENTS,
         Mesh2d(meshes.add(Circle::new(15.))),
         MeshMaterial2d(materials.add(ColorMaterial::from_color(Color::Srgba(
             Srgba::hex("#ff9900").unwrap(),
@@ -64,6 +70,28 @@ fn tick(
                     enemy_bundle(&mut meshes, &mut materials),
                 ));
             }
+        }
+    }
+}
+
+fn bullet_hit(
+    mut enemies: Query<&mut Health, With<Enemy>>,
+    bullets: Query<(&CollidingEntities, &Bullet), With<Bullet>>,
+) {
+    for (hits, bullet) in bullets.iter() {
+        for hit in hits.iter() {
+            if let Ok(mut health) = enemies.get_mut(hit) {
+                health.0 -= bullet.damage;
+                return;
+            }
+        }
+    }
+}
+
+fn despawn_dead(mut commands: Commands, enemies: Query<(Entity, &Health), With<Enemy>>) {
+    for (entity, health) in enemies.iter() {
+        if health.0 < 0. {
+            commands.entity(entity).despawn();
         }
     }
 }

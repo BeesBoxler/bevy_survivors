@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 bevy = "0.18"
 bevy_enhanced_input = "0.24.3"
+bevy_rapier2d = "0.33.0"
 # Set max log levels. This helps avoid unwanted low-severity log spam, which can affect performance.
 log = { version = "0.4", features = [
     "max_level_debug",

@@ -1,6 +1,7 @@
 use crate::{common_components::*, game::MainCamera};
 use bevy::prelude::*;
 use bevy_enhanced_input::prelude::*;
+use bevy_rapier2d::prelude::RigidBody;
 
 pub fn player_plugin(app: &mut App) {
     app.add_systems(Startup, spawn_player);
@@ -21,6 +22,7 @@ pub fn player_entity(
 ) -> impl Bundle {
     (
         Player,
+        RigidBody::KinematicPositionBased,
         Speed(1.5),
         Strength::default(),
         Health(100.),
