@@ -5,7 +5,10 @@ use bevy_survivors::game::game_plugin;
 fn main() -> AppExit {
     let mut app = App::new();
 
-    app.add_plugins((DefaultPlugins, EnhancedInputPlugin));
+    app.add_plugins((
+        DefaultPlugins.set(ImagePlugin::default_nearest()),
+        EnhancedInputPlugin,
+    ));
     app.add_plugins(game_plugin);
 
     app.run()

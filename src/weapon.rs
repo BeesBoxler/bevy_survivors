@@ -92,6 +92,7 @@ fn fire_weapons(
     for (weapon, timer, entity) in weapons.iter() {
         if timer.0.is_finished() {
             let origin = players.get(entity).unwrap().translation;
+
             weapon.fire(&mut commands, &mut meshes, &mut materials, origin);
         }
     }
